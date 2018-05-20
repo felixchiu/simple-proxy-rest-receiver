@@ -1,0 +1,16 @@
+database:
+  image: mysql:5.7
+  container_name: mysql_database
+  environment:
+    - MYSQL_DATABASE=notification
+    - MYSQL_USER=platform
+    - MYSQL_PASSWORD=Pl@tf0rmNexus
+    - MYSQL_ROOT_PASSWORD=Pl@tf0rmNexus
+    - TZ=America/Los_Angeles
+  ports:
+    - 3306:3306
+redis:
+  image: redis
+  command: redis-server --appendonly yes
+  ports:
+    - 6379:6379

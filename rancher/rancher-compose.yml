@@ -1,0 +1,13 @@
+version: '2'
+services:
+  rest:
+    scale: 1
+    start_on_create: true
+    health_check:
+      healthy_threshold: 2
+      response_timeout: 4000
+      port: 7000
+      unhealthy_threshold: 3
+      interval: 6000
+      strategy: recreate
+      request_line: GET /health HTTP/1.0

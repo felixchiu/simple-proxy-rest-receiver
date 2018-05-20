@@ -1,0 +1,19 @@
+{
+  "caseId":1662852,
+  "event":"UPDATE",
+  "testType":"NPT",
+  "opened":1518891278000,
+  "closed":1519413531000,
+  "parentKits": [
+    {
+      "id":1658923,
+      "received":1518891275000,
+      "barcode":"5001335-2-N",
+      "state":"NPT_REPORT_SENT",
+      "microdelState":"MICRODEL_HANDCALL_COMPLETE",
+      "supportState":"NPT_SUPPORT_UNREVIEWED",
+      "reflexState":null,
+      "kitPosition":"patient"
+    }
+  ]
+}

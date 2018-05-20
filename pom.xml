@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         <name>Simple Proxy Rest Receiver</name>
+         <description>Simple Proxy Rest Receiver - Receive Redis message and forward to a REST service</description>
+         <parent>
+             <groupId>org.springframework.boot</groupId>
+             <artifactId>spring-boot-starter-parent</artifactId>
+             <version>1.5.10.RELEASE</version>
+             <relativePath/>
+             <!-- lookup parent from repository -->
+         </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>simple-proxy-rest-receiver</artifactId>
+    <packaging>jar</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+
+
+        <docker-maven-plugin.version>0.25.2</docker-maven-plugin.version>
+        <java.image>java:8-jdk</java.image>
+        <buildNumber>0.1</buildNumber>
+        <image.name>platformnexus/simple-proxy-rest-receiver:${buildNumber}</image.name>
+        <api.basedir>/opt/simple-rest-proxy</api.basedir>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.4</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.11</version>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+            <version>1.4.196</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.dozer</groupId>
+            <artifactId>dozer</artifactId>
+            <version>5.5.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ai.grakn</groupId>
+            <artifactId>redis-mock</artifactId>
+            <version>0.1.6</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>Camden.SR7</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>${docker-maven-plugin.version}</version>
+                <configuration>
+                    <autoPull>always</autoPull>
+                    <images>
+                        <image>
+                            <name>${image.name}</name>
+                            <build>
+                                <env>
+                                    <platform.base>${api.basedir}</platform.base>
+                                    <TZ>America/Los_Angeles</TZ>
+                                </env>
+                                <from>${java.image}</from>
+                                <assembly>
+                                    <mode>dir</mode>
+                                    <basedir>${api.basedir}/jar</basedir>
+                                    <descriptorRef>artifact</descriptorRef>
+                                </assembly>
+                                <runCmds>
+                                    <run>ln -snf /usr/share/zoneinfo/US/Pacific /etc/localtime</run>
+                                    <run>mkdir -p ${api.basedir}</run>
+                                    <run>curl https://s3.amazonaws.com/rds-downloads/rds-ca-2015-root.pem > /tmp/rds-ca-2015-root.pem</run>
+                                    <run>ALIAS=$(openssl x509 -noout -text -in /tmp/rds-ca-2015-root.pem | perl -ne 'next unless /Subject:/; s/.*CN=//; print')</run>
+                                    <run>keytool -import -keystore  $JAVA_HOME/jre/lib/security/cacerts -storepass changeit -noprompt -alias "$ALIAS" -file /tmp/rds-ca-2015-root.pem</run>
+                                </runCmds>
+                                <ports>
+                                    <port>7000</port>
+                                </ports>
+                                <workdir>${api.basedir}</workdir>
+                                <entryPoint>
+                                    <arg>java</arg>
+                                    <arg>-jar</arg>
+                                    <arg>${api.basedir}/jar/${project.build.finalName}.${project.packaging}</arg>
+                                    <arg>--spring.config.name=non-existent-name</arg>
+                                    <arg>--spring.config.location=${api.basedir}/conf/application.properties</arg>
+                                </entryPoint>
+                            </build>
+                        </image>
+                    </images>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
