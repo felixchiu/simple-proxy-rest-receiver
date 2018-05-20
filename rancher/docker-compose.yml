@@ -10,8 +10,8 @@ services:
       SPRING_CLOUD_CONFIG_USERNAME:
       SPRING_PROFILES_ACTIVE: insurance,rest_receiver
     volumes:
-    - /opt/insurance-receiver/logs:/opt/notification-service/logs
-    - /opt/insurance-receiver/conf:/opt/notification-service/conf
+    - /opt/insurance-receiver/logs:/opt/simple-proxy-rest-receiver/logs
+    - /opt/insurance-receiver/conf:/opt/simple-proxy-rest-receiver/conf
     links:
     - redis:redis
     - mysql:mysql

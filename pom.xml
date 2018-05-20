@@ -25,7 +25,7 @@
         <java.image>java:8-jdk</java.image>
         <buildNumber>0.1</buildNumber>
         <image.name>platformnexus/simple-proxy-rest-receiver:${buildNumber}</image.name>
-        <api.basedir>/opt/simple-rest-proxy</api.basedir>
+        <api.basedir>/opt/simple-proxy-rest-receiver</api.basedir>
     </properties>
 
     <dependencies>
