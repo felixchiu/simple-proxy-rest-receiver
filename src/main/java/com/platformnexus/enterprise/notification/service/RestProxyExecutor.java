@@ -75,15 +75,10 @@ public class RestProxyExecutor {
         try {
             ResponseEntity<JsonNode> responseEntity = restTemplate.exchange(url, HttpMethod.valueOf(incomingEvent.getMethod()), ConnectorHelper.getHttpEntity(username, password), JsonNode.class);
             log.info("Response Json: {}", responseEntity.getBody());
-        } catch (HttpClientErrorException e) {
-            if (incomingEvent.getIsProduction()) {
-                log.error("[NOTIFY SUPPORT]: {}", incomingEvent);
-                throw e;
-            }
         } catch (Exception e) {
             if (incomingEvent.getIsProduction()) {
                 log.error("[NOTIFY SUPPORT]: {}", incomingEvent);
-                throw e;
+                e.printStackTrace();
             }
         }
         incomingEvent = service.completeIncomingEvent(incomingEvent.getId());
