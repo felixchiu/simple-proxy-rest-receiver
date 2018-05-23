@@ -23,7 +23,7 @@
 
         <docker-maven-plugin.version>0.25.2</docker-maven-plugin.version>
         <java.image>java:8-jdk</java.image>
-        <buildNumber>0.1</buildNumber>
+        <buildNumber>0.01</buildNumber>
         <image.name>platformnexus/simple-proxy-rest-receiver:${buildNumber}</image.name>
         <api.basedir>/opt/simple-proxy-rest-receiver</api.basedir>
     </properties>
